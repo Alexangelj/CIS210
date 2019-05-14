@@ -1,4 +1,15 @@
+"""
+  Too Many Pins.  Assignment 1, Part 1 CIS 210
+  Authors:  Alexander Angel
+  Credits: None
+  
+  Convert pins and integers into vowel-consonant pairs which are pronounceable nonsense words.
+  """
+
 import argparse
+
+error_message = 'Argument not valid. Please use an integer.'
+
 def alphacode(pin):
     """
     Convert numeric pin code to an
@@ -7,19 +18,20 @@ def alphacode(pin):
         pin:  code as positive integer
     returns:
         mnemonic as string
-    
-    mnemonic = "This can't be right"
-    return mnemonic
     """
     mnemonic = ''
     vowels = list(''.join('aeiou'))
-    consonants = list(''.join('bcdfghjklmnpqrstvwyz'))
+    consonants = list(''.join('bcdfghjklmnpqrstvwyz'))  
     while pin > 0:
-        cut = pin % 100
-        pin = pin // 100
-        remainder = cut % 5
-        quotient = cut // 5
-        mnemonic += str(vowels[remainder] + consonants[quotient])
+        try:
+            i = pin % 100
+            pin = pin // 100
+            remainder = i % 5
+            quotient = i // 5
+            mnemonic += str(vowels[remainder] + consonants[quotient])
+        except TypeError:
+            print(error_message)
+            return error_message
     if pin < 1:
         return mnemonic[::-1]
 
@@ -47,7 +59,10 @@ def run_tests():
     print("**** Edge cases (robustness testing) ****")
     testEQ("0 => empty mnemonic ?", alphacode(0), "")
     testEQ("-42 and all negative numbers => empty mnemonic? ", alphacode(-42), "")
-    print("*** End of provided test cases.  Add some of your own? ****")
+    testEQ("Invalid argument (float) => error? ", alphacode(0.2), error_message)
+    testEQ("Larger Invalid argument (float) => error? ", alphacode(1005040.352), error_message)
+    testEQ("Invalid argument (float) and negative => 0", alphacode(-3.14), "")
+    print("*** End of provided test cases. ****")
 
 def main():
     """
@@ -61,8 +76,8 @@ def main():
     args = parser.parse_args()  # gets arguments from command line
     pin = args.PIN
     mnemonic = alphacode(pin)
-    print("Memorable PIN:", mnemonic)
+    print('Encoding of {} is {}'.format(pin,mnemonic))
 
 if __name__ == "__main__":
-    run_tests()
+    #run_tests()
     main()     
