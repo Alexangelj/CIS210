@@ -1,6 +1,6 @@
 """
   Too Many Pins.  Assignment 1, Part 1 CIS 210
-  Authors:  Alexander Angel
+  Author: Alexander Angel
   Credits: None
   
   Convert pins and integers into vowel-consonant pairs which are pronounceable nonsense words.
@@ -35,7 +35,6 @@ def alphacode(pin):
     if pin < 1:
         return mnemonic[::-1]
 
-alphacode(3464140)
 def testEQ(test,funcn,result):
     if funcn == result:
         print('True')
