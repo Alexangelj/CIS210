@@ -134,7 +134,7 @@ class Board(object):
 
     def __init__(self):
         """The empty board"""
-        self.groups: List[List[Tile]] = []
+        self.groups: List[List[[Tile]]] = [ ]
         # Row/Column structure: Each row contains columns
         self.tiles: List[List[Tile]] = [ ]
         for row in range(NROWS):
@@ -142,6 +142,8 @@ class Board(object):
             for col in range(NCOLS):
                 cols.append(Tile(row, col))
             self.tiles.append(cols)
+            
+
         for block_row in range(ROOT):
             for block_col in range(ROOT):
                 group = [ ] 
@@ -151,18 +153,15 @@ class Board(object):
                         col_addr = (ROOT * block_col) + col
                         group.append(self.tiles[row_addr][col_addr])
                 self.groups.append(group)
+        
         for row in self.tiles: 
             self.groups.append(row)
-        for col in range(len(self.tiles)):
-            self.groups.append(col)
-        """
+
         for row in range(len(self.tiles)):
-            columns = []
-            for col in range(len(self.tiles)):
-                columns.append(self.tiles[row][col::8])
+            columns = [ ]
+            for col in range(NCOLS):
+                columns.append(self.tiles[col][row])
             self.groups.append(columns)
-        print(self.tiles[0][1:])
-        """
 
 
     def set_tiles(self, tile_values: Sequence[Sequence[str]] ):
@@ -179,42 +178,51 @@ class Board(object):
             values = [tile.value for tile in row]
             row_syms.append("".join(values))
         return "\n".join(row_syms)
-
-    def solve(self):
-        progress = True
-        while progress:
-            progress = self.naked_single()
-        return
+    
+    def is_consistent(self) -> bool:
+        for group in self.groups:
+            used_symbols = set()
+            #print(group)
+            #print('printed group')
+            for tile in group:
+                #print(tile)
+                if str(tile) in CHOICES:
+                    #print('if tile is "." we should not be here')
+                    if str(tile) in used_symbols:
+                        #print("Got to False")
+                        #print(used_symbols)
+                        return False
+                    else:
+                        #print('Got to add tiles' + ' ' + str(tile))
+                        used_symbols.add(str(tile))
+            #print(used_symbols)
+        return True
 
     def naked_single(self) -> bool:
         """Eliminate candidates and check for sole remaining possibilities.
         Return value True means we crossed off at least one candidate.
         Return value False means we made no progress.
         """
-        pass
-    
-    def is_consistent(self) -> bool:
         for group in self.groups:
             used_symbols = set()
             print(group)
-            print('printed group')
             for tile in group:
-                #print(tile)
-                if str(tile) in CHOICES:
-                    #print('if tile is "." we should not be here')
-                    if str(tile) in used_symbols:
-                        print("Got to False")
-                        print(used_symbols)
-                        return False
-                    else:
-                        #print('Got to add tiles')
-                        used_symbols.add(str(tile))
-            #print(used_symbols)
-            #print(group)
-        return True
+                if tile in used_symbols:
+                    x = Tile.remove_candidates(tile, used_symbols)
+                    return x
+                else: 
+                    used_symbols.add(tile)
+                    print(used_symbols)
+            
+        
+    def solve(self):
+        progress = True
+        while progress:
+            progress = self.naked_single()
+        return
 
 board = Board()
-board.set_tiles(["...26.7.1", "68..7..9.", "19...45..",
-                "82.1...4.", "..46.29..", ".5...3.28",
-                "..93...74", ".4..5..36", "7.3.18..."])
-board.is_consistent()
+board.set_tiles([".........", "......1..", "......7..",
+                         "......29.", "........4", ".83......",
+                         "......5..", ".........", "........."])
+print(board.naked_single())
