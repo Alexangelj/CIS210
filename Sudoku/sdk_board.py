@@ -153,8 +153,16 @@ class Board(object):
                 self.groups.append(group)
         for row in self.tiles: 
             self.groups.append(row)
-        for col in self.tiles:
+        for col in range(len(self.tiles)):
             self.groups.append(col)
+        """
+        for row in range(len(self.tiles)):
+            columns = []
+            for col in range(len(self.tiles)):
+                columns.append(self.tiles[row][col::8])
+            self.groups.append(columns)
+        print(self.tiles[0][1:])
+        """
 
 
     def set_tiles(self, tile_values: Sequence[Sequence[str]] ):
@@ -188,7 +196,8 @@ class Board(object):
     def is_consistent(self) -> bool:
         for group in self.groups:
             used_symbols = set()
-            #print(group)
+            print(group)
+            print('printed group')
             for tile in group:
                 #print(tile)
                 if str(tile) in CHOICES:
