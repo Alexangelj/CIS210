@@ -144,7 +144,7 @@ class TestNakedSingle(unittest.TestCase):
         self.assertFalse(progress, "No more progress on this simple example")
         self.assertEqual(str(board),
             ".........\n......1..\n......7..\n......29.\n........4\n.83...6..\n......5..\n.........\n.........")
-
+    
     def test_naked_single_one(self):
         """This puzzle can be solved with multiple rounds of naked single."""
         board = Board()

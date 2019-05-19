@@ -111,7 +111,8 @@ class Tile(Listenable):
         return value in self.candidates
 
     def remove_candidates(self, used_values: Set[str]):
-        """The used values cannot be a value of this unknown tile.
+        """
+        The used values cannot be a value of this unknown tile.
         We remove those possibilities from the list of candidates.
         If there is exactly one candidate left, we set the
         value of the tile.
@@ -203,17 +204,176 @@ class Board(object):
         Return value True means we crossed off at least one candidate.
         Return value False means we made no progress.
         """
+        used_values = set()
         for group in self.groups:
-            used_symbols = set()
-            print(group)
+            #used_values = set()
             for tile in group:
-                if tile in used_symbols:
-                    x = Tile.remove_candidates(tile, used_symbols)
-                    return x
-                else: 
-                    used_symbols.add(tile)
-                    print(used_symbols)
+                if str(tile) in CHOICES:
+                    used_values.add(tile.value)
+            #print(group)
+            #print(used_values)
+            for tile in group:
+                if len(used_values) > 0:
+                    if str(tile) in UNKNOWN:
+                        print(used_values.difference(tile.candidates))
+                        if used_values.difference(tile.candidates) is not used_values:
+                            #print(len(tile.candidates.difference(used_values)))
+                            if len(tile.candidates.difference(used_values)) > 0:
+                                print('{} = tile candidates'.format(tile.candidates))
+                                print('{} = used values'.format(used_values))
+                            return Tile.remove_candidates(tile, used_values)
+        """
+        used_values = set()
+        for group in self.groups:
+            if len(used_values) < 6:
+                for tile in group:
+                    if str(tile) in CHOICES:
+                        used_values.add(tile.value)
+                        if str(tile) is '6':
+                            print(group)
+                            print("hit 6")
+            else:
+                for tile in group:
+                    if str(tile) in UNKNOWN:
+                        if len(tile.candidates) > 1:    
+                            #print(tile)
+                            #print(used_values)
+                            print(tile.candidates)
+                            print(used_values)
+                            return Tile.remove_candidates(tile, used_values)
+        """
+        """
+        used_values = set()
+        for group in self.groups:
+            for tile in group:
+                if str(tile) in CHOICES:
+                    used_values.add(tile.value)
+                    if str(tile) is '6':
+                        print(group)
+                        print("hit 6")
+        for group in self.groups:
+            for tile in group:
+                if str(tile) in UNKNOWN:
+                    if len(tile.candidates) > 1:    
+                        #print(tile)
+                        #print(used_values)
+                        print(tile.candidates)
+                        print(used_values)
+                        return Tile.remove_candidates(tile, used_values)
+                    else:
+                        print(tile.candidates)
+                        print(used_values)
+                        return False
+        """
+        """
+        used_values = set()
+        progress = True
+        while progress:
+            for group in self.groups:
+                #Tile.used_values = set()
+                for value in group:
+                    if str(value) in CHOICES:
+                        #print(value.candidates)
+                        if value.value in value.candidates:
+                            #print("value.value in value.candidates")
+                            used_values.add(value.value)
+                        #print(used_values)
+
+                        #print("progress 1")
+                        #print("progress 2")
+                        #print(value)
+                        #print(used_values)
+                for symbol in used_values:
+                    print("progress 3")
+                    progress = Tile.remove_candidates(value, symbol)
+                    print(progress)
+                    return progress
+            progress = False
+                #print(tile.value)
+        """
+
+        """
+        for group in self.groups:
+            candidates_single = set()
+            #print(group)
+            for tile in group:
+                #print(tile)
+                if str(tile) in CHOICES:
+                    #print(str(tile))
+                    if str(tile) in candidates_single:
+                        #print(str(tile))
+                        x = Tile.remove_candidates(str(tile), candidates_single)
+                        print(x)
+                        return True
+                    else: 
+                        candidates_single.add(tile)
+                        #print(candidates_single)
+            for tile in candidates_single:
+                if tile in candidates_single:
+                    print(tile)
+                    return Tile.remove_candidates(tile, candidates_single)
+                else:
+                    return False
+            """
+        """
+        candidates_single = set()
+        for group in self.groups:
+            #print(group)
+            for tile in group:
+                if str(tile) in CHOICES:
+                    candidates_single.add(tile)
+            for tile in group:
+                if tile in candidates_single:    
+                    #print('removed candidates ' + str(tile))
+                    #print(tile)
+                    print(tile)
+                    print(candidates_single)
+                    print(Tile.remove_candidates(tile, candidates_single))
+        return False
+        """
+        """
+        candidates_1 = set()
+        for row in range(len(self.groups)):
+            for col in range(len(self.groups[row])):
+                candidates_1.add(self.groups[row][col])
+                if str(self.groups[row][col]) in CHOICES:
+                    print(self.groups[row][col])
+                    print("got to tile.remove")
+                    print(Tile.remove_candidates(self.groups[row][col], candidates_1))
+        """
+        """
+        used_candidates = set()
+        candidates_active = set(CHOICES)
+        for group in self.groups:
             
+            #print(candidates_active)
+            for tile in group:
+                if str(tile) in CHOICES:
+                    used_candidates.add(tile)
+        #print(candidates_active)
+        #print(used_candidates)
+        for group in self.groups:
+            #print(used_candidates)
+            for value in group:
+                if str(value) in CHOICES:
+                    print(value)
+                    #print(used_candidates)
+                    print('removed ' + str(value))
+                    Tile.remove_candidates(value, candidates_active)
+                    if value not in candidates_active:
+                        used_candidates.remove(value)
+                        print(used_candidates)
+                    return True
+                    #print(value.value)
+                    #print(candidates_active)
+            if value.value in candidates_active:
+                candidates_active.remove(value.value)
+                #print(candidates_active)
+            #print(candidates_active)
+            if len(candidates_active) == 1:
+                return Tile.remove_candidates(value, candidates_active)
+        return True
+        """
         
     def solve(self):
         progress = True
@@ -226,3 +386,6 @@ board.set_tiles([".........", "......1..", "......7..",
                          "......29.", "........4", ".83......",
                          "......5..", ".........", "........."])
 print(board.naked_single())
+print(board.naked_single())
+print(board.naked_single())
+board.solve()
