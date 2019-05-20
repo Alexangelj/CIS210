@@ -205,7 +205,7 @@ class Board(object):
         Return value False means we made no progress.
         """
         candidate_set_before = 0
-        print(candidate_set_before)
+        #print(candidate_set_before)
         for group in self.groups:
             used_values = set()
             for tile in group:
@@ -213,11 +213,11 @@ class Board(object):
                     used_values.add(tile.value)
             for tile in group:
                 if str(tile) in UNKNOWN and len(used_values) > 0:
-                    print(used_values)
+                    #print(used_values)
                     if Tile.remove_candidates(tile, used_values):
                         candidate_set_before += 1
         candidate_set_after = candidate_set_before
-        print(candidate_set_after)
+        #print(candidate_set_after)
         if candidate_set_after > 0:
             return True
         else:

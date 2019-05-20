@@ -1,0 +1,2 @@
+Note to self:
+don't call a method that changes an object in a print statement or the print statement will alter the object
