@@ -204,9 +204,50 @@ class Board(object):
         Return value True means we crossed off at least one candidate.
         Return value False means we made no progress.
         """
-        used_values = set()
+        candidate_set_before = 0
+        print(candidate_set_before)
         for group in self.groups:
-            #used_values = set()
+            used_values = set()
+            for tile in group:
+                if str(tile) in CHOICES:
+                    used_values.add(tile.value)
+            for tile in group:
+                if str(tile) in UNKNOWN and len(used_values) > 0:
+                    print(used_values)
+                    if Tile.remove_candidates(tile, used_values):
+                        candidate_set_before += 1
+        candidate_set_after = candidate_set_before
+        print(candidate_set_after)
+        if candidate_set_after > 0:
+            return True
+        else:
+            return False
+        """
+        for group in self.groups:
+            used_tiles = set()
+            for tile in group:
+                if str(tile) in CHOICES:
+                    #print(str(used_tiles) + ' ' + str(tile.candidates))
+                    used_tiles.add(tile.value)
+                    #print(used_tiles)
+            for tile in group:
+                if str(tile) in UNKNOWN and len(used_tiles) > 0:
+                    #print('if {} is in {} should print progress then True'.format(used_tiles, tile.candidates))
+                    #print('{} in {}'.format(used_tiles, tile.candidates))
+                    #print(len(used_tiles.intersection(tile.candidates)))
+                    if len(used_tiles.intersection(tile.candidates)) > 0:
+                        #print("progress")
+                        #print(used_tiles)
+                        #print(tile.candidates)
+                        return Tile.remove_candidates(tile, used_tiles)
+                    else:
+                        return False
+        return False
+        """
+        """
+        #used_values = set()
+        for group in self.groups:
+            used_values = set()
             for tile in group:
                 if str(tile) in CHOICES:
                     used_values.add(tile.value)
@@ -215,13 +256,21 @@ class Board(object):
             for tile in group:
                 if len(used_values) > 0:
                     if str(tile) in UNKNOWN:
-                        print(used_values.difference(tile.candidates))
-                        if used_values.difference(tile.candidates) is not used_values:
-                            #print(len(tile.candidates.difference(used_values)))
-                            if len(tile.candidates.difference(used_values)) > 0:
-                                print('{} = tile candidates'.format(tile.candidates))
-                                print('{} = used values'.format(used_values))
-                            return Tile.remove_candidates(tile, used_values)
+                        #print(used_values.difference(tile.candidates))
+                        difference_check = tile.candidates.difference(used_values)
+                        print(difference_check)
+                        #print('{} difference check'.format(difference_check.difference(used_values)))
+                        d2 = difference_check.difference(used_values)
+                        print(d2)
+                        for value in tile.candidates:
+                            if value not in used_values:
+                                if len(d2) > 0:
+                                    #print(len(tile.candidates.difference(used_values)))
+                                    if len(tile.candidates.difference(used_values)) > 0:
+                                        print('{} = tile candidates'.format(tile.candidates))
+                                        print('{} = used values'.format(used_values))
+                                    return Tile.remove_candidates(tile, used_values)
+        """
         """
         used_values = set()
         for group in self.groups:
