@@ -256,6 +256,7 @@ class Board(object):
             return True
         else:
             return False
+    
         
     def min_choice_tile(self) -> Tile: 
         """Returns a tile with value UNKNOWN and 
@@ -265,15 +266,19 @@ class Board(object):
         """
         unknowns_in_board = False # Pre-condition: must contain unknown ('.') values
         min_candidates_tile = 8 # Start at max amount of candidates -> 0 to 8 possible candidates
-        min_tile = Tile # Stores the tile with the minimum amount of candidates 
+        min_tile = Tile
         for group in self.groups:
             for tile in group: # Confirms pre-condition is met
                 if tile.value in UNKNOWN:
                     unknowns_in_board = True
+                else:
+                    unknowns_in_board = False # This line is critical in order to continue the loop
+            for tile in group:
+                # Iterate through tiles in each group
+                # and change min_tile if corresponding tile 
+                # has less candidates than the currently stored tile
+                if unknowns_in_board and tile.value in UNKNOWN:
                     if len(tile.candidates) < min_candidates_tile:
-                        # Iterate through tiles in each group
-                        # and change min_tile if corresponding tile 
-                        # has less candidates than the currently stored tile
                         min_tile = tile
                         min_candidates_tile = len(tile.candidates)
         if unknowns_in_board: # Must finish looping through all tiles, return value is Tile with unknown value '.'
