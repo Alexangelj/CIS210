@@ -1,2 +1,21 @@
 Note to self:
 don't call a method that changes an object in a print statement or the print statement will alter the object
+Naked single code:
+    candidate_set_before = 0
+        #print(candidate_set_before)
+        for group in self.groups:
+            used_values = set()
+            for tile in group:
+                if str(tile) in CHOICES:
+                    used_values.add(tile.value)
+            for tile in group:
+                if str(tile) in UNKNOWN and len(used_values) > 0:
+                    #print(used_values)
+                    if Tile.remove_candidates(tile, used_values):
+                        candidate_set_before += 1
+        candidate_set_after = candidate_set_before
+        #print(candidate_set_after)
+        if candidate_set_after > 0:
+            return True
+        else:
+            return False

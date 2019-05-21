@@ -51,7 +51,7 @@ class TestBoardBuild(unittest.TestCase):
 class TestBoardIO(unittest.TestCase):
 
     def test_read_new_board(self):
-        board = sdk_reader.read(open("data\\00-nakedsubset1.sdk"))
+        board = sdk_reader.read(open("CIS210\\Sudoku\\data\\00-nakedsubset1.sdk"))
         as_printed = str(board)
         self.assertEqual(as_printed,
             "32...14..\n9..4.2..3\n..6.7...9\n8.1..5...\n...1.6...\n...7..1.8\n1...9.5..\n2..8.4..7\n..45...31")
@@ -156,6 +156,41 @@ class TestNakedSingle(unittest.TestCase):
                          "\n".join(["435269781", "682571493", "197834562",
                                     "826195347", "374682915", "951743628",
                                     "519326874", "248957136", "763418259"]))
+class TestHiddenSingle(unittest.TestCase):
+    """Test the Hidden Single tactic, which must be combined with the
+    naked single tactic.
+    """
+
+    def test_hidden_single_example(self):
+        """Simple example from Sadman Sudoku. Since 2 is blocked
+        in two columns of the board, it must go into the middle
+        column.
+        """
+        board = Board()
+        board.set_tiles([".........", "...2.....",  ".........",
+                         "....6....", ".........",  "....8....",
+                         ".........", ".........", ".....2..."])
+        board.naked_single()
+        board.hidden_single()
+        self.assertEqual(str(board),
+                         "\n".join(
+                        [".........", "...2.....",  ".........",
+                         "....6....", "....2....",  "....8....",
+                         ".........", ".........", ".....2..."]))
+
+    def test_hidden_single_solve(self):
+        """This puzzle can be solved with naked single
+        and hidden single together.
+        """
+        board = Board()
+        board.set_tiles(["......12.", "24..1....", "9.1..4...",
+                         "4....365.", "....9....", ".364....1",
+                         "...1..5.6", "....5..43", ".72......"])
+        board.solve()
+        self.assertEqual(str(board),
+                         "\n".join(["687539124", "243718965", "951264387",
+                                    "419873652", "725691438", "836425791",
+                                    "394182576", "168957243", "572346819"]))
 
 if __name__ == "__main__":
     unittest.main()

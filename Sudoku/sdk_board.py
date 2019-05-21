@@ -423,18 +423,141 @@ class Board(object):
                 return Tile.remove_candidates(value, candidates_active)
         return True
         """
+    def hidden_single(self) -> bool:
+        """
+        Suppose we have eliminated all but two candidates from all our unknown tiles. If one of the 
+        unknown tiles has a value of 3 and no other unknown tiles have that value of 3, then
+        the tile with a candidate of 3 must have the value of 3 because there is no other place
+        to put it (i.e. no other tile has a candidate of 3 because 3 was elimated).
+
+        Return True if a value was placed on a tile (marking we made progress)
+        Returns False if no value was placed on a tile (marking we made no progress).
+        """
+        tile_to_change = None
+        for group in self.groups:
+            set_tile = 0
+            leftovers = set(CHOICES)
+            for tile in group:
+                if tile.value in CHOICES:
+                    if tile.value in leftovers:
+                        leftovers.remove(tile.value)
+            for value in leftovers:
+                count = 0
+                for tile in group:
+                    if value not in tile.value:
+                        if value in tile.candidates:
+                            #print(value)
+                            count += 1
+                            tile_to_change = tile
+                if count < 2 and count > 0:
+                    #print(tile_to_change.candidates)
+                    print(group)
+                    #print(value)
+                    tile_to_change.set_value(value)
+                    tile_to_change.notify_all(TileEvent(tile_to_change, EventKind.TileChanged))
+                    set_tile += 1
+        if set_tile > 0:
+            return True
+        else:
+            return False
+        """
+        This iteration #### WORKS ####
+        set_tile = False
+        tile_to_change = None
+        for group in self.groups:
+            leftovers = set(CHOICES)
+            for tile in group:
+                if tile.value in CHOICES:
+                    if tile.value in leftovers:
+                        leftovers.remove(tile.value)
+            for value in leftovers:
+                count = 0
+                for tile in group:
+                    if value not in tile.value:
+                        if value in tile.candidates:
+                            #print(value)
+                            if value is '2':
+                                print('{} tile candidates for {}'.format(tile.candidates, value))
+                            count += 1
+                            tile_to_change = tile
+                if count < 2 and count > 0:
+                    print(tile.candidates)
+                    print(group)
+                    print(value)
+                    tile_to_change.set_value(value)
+                    tile_to_change.notify_all(TileEvent(tile, EventKind.TileChanged))
+                    set_tile = True
+                    return True
+        if set_tile:
+            return True
+        else:
+            return False
+        """
+        """
+        set_tile = False
+        for group in self.groups:
+            leftovers = set(CHOICES)
+            for tile in group:
+                if tile.value in CHOICES:
+                    if tile.value in leftovers:
+                        leftovers.remove(tile.value)
+            for value in leftovers:
+                count = 0
+                for tile in group:
+                    for tile in group:
+                        if value not in tile.value:
+                            if value in tile.candidates:
+                                print(value)
+                                print('{} tile candidates for {}'.format(tile.candidates, value))
+                                count += 1
+                    if count < 2 and count > 0:
+                        print(tile.candidates)
+                        print(group)
+                        print(value)
+                        tile.set_value(value)
+                        tile.notify_all(TileEvent(tile, EventKind.TileChanged))
+                        set_tile = True
+                        return True
+        if set_tile:
+            return True
+        else:
+            return False
+        """
         
+        """
+        for group in self.groups:
+            leftovers = set(CHOICES)
+            for tile in group:
+                if tile.value in CHOICES:
+                    if tile.value in leftovers:
+                        leftovers.remove(tile.value)
+            for value in leftovers:
+                count = 0
+                for tile in group:
+                    for candidates in tile.candidates:
+                        #print(candidates)
+                        if value in candidates:
+                            #print(value)
+                            #print(candidates)
+                            count += 1
+                            print(str(count) + ' is count for ' + str(candidates))
+                if count < 2 and count > 0:
+                    print(value)
+                    tile.set_value(value)
+                    tile.notify_all(TileEvent(tile, EventKind.TileChanged))
+                    return True
+        return False
+        """
     def solve(self):
         progress = True
         while progress:
             progress = self.naked_single()
+            self.hidden_single()
         return
 
 board = Board()
-board.set_tiles([".........", "......1..", "......7..",
-                         "......29.", "........4", ".83......",
-                         "......5..", ".........", "........."])
-print(board.naked_single())
-print(board.naked_single())
-print(board.naked_single())
+board.set_tiles(["......12.", "24..1....", "9.1..4...",
+                         "4....365.", "....9....", ".364....1",
+                         "...1..5.6", "....5..43", ".72......"])
 board.solve()
+print(board)
