@@ -226,13 +226,19 @@ class Board(object):
         
     def hidden_single(self) -> bool:
         """
-        Suppose we have eliminated all but two candidates from all our unknown tiles. If one of the 
-        unknown tiles has a value of 3 and no other unknown tiles have that value of 3, then
-        the tile with a candidate of 3 must have the value of 3 because there is no other place
-        to put it (i.e. no other tile has a candidate of 3 because 3 was elimated from their candidates).
+        Suppose we have eliminated all but two candidates 
+        from all our unknown tiles. If one of the 
+        unknown tiles has a value of 3 and no other 
+        unknown tiles have that value of 3, then
+        the tile with a candidate of 3 must have the 
+        value of 3 because there is no other place
+        to put it (i.e. no other tile has a candidate of 3 
+        because 3 was elimated from their candidates).
 
-        Return value True if a value was placed on a tile (marking we *made* progress).
-        Return value False if no value was placed on a tile (marking we *did not make* progress).
+        Return value True if a value was placed on a tile 
+        (marking we *made* progress).
+        Return value False if no value was placed on a tile 
+        (marking we *did not make* progress).
         """
         tile_to_change = None # Stores the tile with a sole candidate within the group
         for group in self.groups:
