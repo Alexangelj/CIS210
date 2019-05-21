@@ -1,5 +1,10 @@
 """
-Sudoku board to hold board and tile classes
+Sudoku board to hold board and tile classes.
+Author: Alexander Angel
+Authored: is_consistent, naked_single, hidden_single, min_choice_tile, is_complete, solve methods.
+Credits: Nathan Malamud for helping me understand how to iterate through a matrix properly.
+Date: 5/20/2019
+Time: 23:09:09
 """
 
 from sdk_config import CHOICES, UNKNOWN, ROOT
@@ -142,9 +147,7 @@ class Board(object):
             cols = [ ]
             for col in range(NCOLS):
                 cols.append(Tile(row, col))
-            self.tiles.append(cols)
-            
-
+            self.tiles.append(cols)  
         for block_row in range(ROOT):
             for block_col in range(ROOT):
                 group = [ ] 
@@ -154,16 +157,13 @@ class Board(object):
                         col_addr = (ROOT * block_col) + col
                         group.append(self.tiles[row_addr][col_addr])
                 self.groups.append(group)
-        
         for row in self.tiles: 
             self.groups.append(row)
-
         for row in range(len(self.tiles)):
             columns = [ ]
             for col in range(NCOLS):
                 columns.append(self.tiles[col][row])
             self.groups.append(columns)
-
 
     def set_tiles(self, tile_values: Sequence[Sequence[str]] ):
         """Set the tile values a list of lists or a list of strings"""
@@ -188,22 +188,19 @@ class Board(object):
         return row_syms
     
     def is_consistent(self) -> bool:
+        """
+        Checks group by group (i.e. rows, columns, blocks) and checks for duplicate values.
+        Return value True if no duplicates are found on board.
+        Return value False if duplicate is found on board.
+        """
         for group in self.groups:
             used_symbols = set()
-            #print(group)
-            #print('printed group')
             for tile in group:
-                #print(tile)
-                if str(tile) in CHOICES:
-                    #print('if tile is "." we should not be here')
-                    if str(tile) in used_symbols:
-                        #print("Got to False")
-                        #print(used_symbols)
+                if tile.value in CHOICES:
+                    if tile.value in used_symbols: # If tile.value is more than once to used_symbols
                         return False
                     else:
-                        #print('Got to add tiles' + ' ' + str(tile))
-                        used_symbols.add(str(tile))
-            #print(used_symbols)
+                        used_symbols.add(tile.value)
         return True
 
     def naked_single(self) -> bool:
@@ -211,380 +208,75 @@ class Board(object):
         Return value True means we crossed off at least one candidate.
         Return value False means we made no progress.
         """
-        candidate_set_before = 0
-        #print(candidate_set_before)
+        candidate_set_before = 0 # No changes to candidate set, progress is False
         for group in self.groups:
             used_values = set()
-            for tile in group:
-                if str(tile) in CHOICES:
+            for tile in group: # Adds the currently used values within the group to a set
+                if tile.value in CHOICES:
                     used_values.add(tile.value)
-            for tile in group:
-                if str(tile) in UNKNOWN and len(used_values) > 0:
-                    #print(used_values)
-                    if Tile.remove_candidates(tile, used_values):
-                        candidate_set_before += 1
+            for tile in group: # Loops through tiles and remove a candidate if that candidate is already a value placed on the board
+                if tile.value in UNKNOWN and len(used_values) > 0:
+                    if Tile.remove_candidates(tile, used_values): # Removes values from candidates so there are no duplicates in the group
+                        candidate_set_before += 1 # Change to candidate set, progress is True
         candidate_set_after = candidate_set_before
-        #print(candidate_set_after)
-        if candidate_set_after > 0:
+        if candidate_set_after > 0: # If at least one change was made to a tile's value, return value is True
             return True
         else:
-            return False
-        """
-        for group in self.groups:
-            used_tiles = set()
-            for tile in group:
-                if str(tile) in CHOICES:
-                    #print(str(used_tiles) + ' ' + str(tile.candidates))
-                    used_tiles.add(tile.value)
-                    #print(used_tiles)
-            for tile in group:
-                if str(tile) in UNKNOWN and len(used_tiles) > 0:
-                    #print('if {} is in {} should print progress then True'.format(used_tiles, tile.candidates))
-                    #print('{} in {}'.format(used_tiles, tile.candidates))
-                    #print(len(used_tiles.intersection(tile.candidates)))
-                    if len(used_tiles.intersection(tile.candidates)) > 0:
-                        #print("progress")
-                        #print(used_tiles)
-                        #print(tile.candidates)
-                        return Tile.remove_candidates(tile, used_tiles)
-                    else:
-                        return False
-        return False
-        """
-        """
-        #used_values = set()
-        for group in self.groups:
-            used_values = set()
-            for tile in group:
-                if str(tile) in CHOICES:
-                    used_values.add(tile.value)
-            #print(group)
-            #print(used_values)
-            for tile in group:
-                if len(used_values) > 0:
-                    if str(tile) in UNKNOWN:
-                        #print(used_values.difference(tile.candidates))
-                        difference_check = tile.candidates.difference(used_values)
-                        print(difference_check)
-                        #print('{} difference check'.format(difference_check.difference(used_values)))
-                        d2 = difference_check.difference(used_values)
-                        print(d2)
-                        for value in tile.candidates:
-                            if value not in used_values:
-                                if len(d2) > 0:
-                                    #print(len(tile.candidates.difference(used_values)))
-                                    if len(tile.candidates.difference(used_values)) > 0:
-                                        print('{} = tile candidates'.format(tile.candidates))
-                                        print('{} = used values'.format(used_values))
-                                    return Tile.remove_candidates(tile, used_values)
-        """
-        """
-        used_values = set()
-        for group in self.groups:
-            if len(used_values) < 6:
-                for tile in group:
-                    if str(tile) in CHOICES:
-                        used_values.add(tile.value)
-                        if str(tile) is '6':
-                            print(group)
-                            print("hit 6")
-            else:
-                for tile in group:
-                    if str(tile) in UNKNOWN:
-                        if len(tile.candidates) > 1:    
-                            #print(tile)
-                            #print(used_values)
-                            print(tile.candidates)
-                            print(used_values)
-                            return Tile.remove_candidates(tile, used_values)
-        """
-        """
-        used_values = set()
-        for group in self.groups:
-            for tile in group:
-                if str(tile) in CHOICES:
-                    used_values.add(tile.value)
-                    if str(tile) is '6':
-                        print(group)
-                        print("hit 6")
-        for group in self.groups:
-            for tile in group:
-                if str(tile) in UNKNOWN:
-                    if len(tile.candidates) > 1:    
-                        #print(tile)
-                        #print(used_values)
-                        print(tile.candidates)
-                        print(used_values)
-                        return Tile.remove_candidates(tile, used_values)
-                    else:
-                        print(tile.candidates)
-                        print(used_values)
-                        return False
-        """
-        """
-        used_values = set()
-        progress = True
-        while progress:
-            for group in self.groups:
-                #Tile.used_values = set()
-                for value in group:
-                    if str(value) in CHOICES:
-                        #print(value.candidates)
-                        if value.value in value.candidates:
-                            #print("value.value in value.candidates")
-                            used_values.add(value.value)
-                        #print(used_values)
-
-                        #print("progress 1")
-                        #print("progress 2")
-                        #print(value)
-                        #print(used_values)
-                for symbol in used_values:
-                    print("progress 3")
-                    progress = Tile.remove_candidates(value, symbol)
-                    print(progress)
-                    return progress
-            progress = False
-                #print(tile.value)
-        """
-
-        """
-        for group in self.groups:
-            candidates_single = set()
-            #print(group)
-            for tile in group:
-                #print(tile)
-                if str(tile) in CHOICES:
-                    #print(str(tile))
-                    if str(tile) in candidates_single:
-                        #print(str(tile))
-                        x = Tile.remove_candidates(str(tile), candidates_single)
-                        print(x)
-                        return True
-                    else: 
-                        candidates_single.add(tile)
-                        #print(candidates_single)
-            for tile in candidates_single:
-                if tile in candidates_single:
-                    print(tile)
-                    return Tile.remove_candidates(tile, candidates_single)
-                else:
-                    return False
-            """
-        """
-        candidates_single = set()
-        for group in self.groups:
-            #print(group)
-            for tile in group:
-                if str(tile) in CHOICES:
-                    candidates_single.add(tile)
-            for tile in group:
-                if tile in candidates_single:    
-                    #print('removed candidates ' + str(tile))
-                    #print(tile)
-                    print(tile)
-                    print(candidates_single)
-                    print(Tile.remove_candidates(tile, candidates_single))
-        return False
-        """
-        """
-        candidates_1 = set()
-        for row in range(len(self.groups)):
-            for col in range(len(self.groups[row])):
-                candidates_1.add(self.groups[row][col])
-                if str(self.groups[row][col]) in CHOICES:
-                    print(self.groups[row][col])
-                    print("got to tile.remove")
-                    print(Tile.remove_candidates(self.groups[row][col], candidates_1))
-        """
-        """
-        used_candidates = set()
-        candidates_active = set(CHOICES)
-        for group in self.groups:
-            
-            #print(candidates_active)
-            for tile in group:
-                if str(tile) in CHOICES:
-                    used_candidates.add(tile)
-        #print(candidates_active)
-        #print(used_candidates)
-        for group in self.groups:
-            #print(used_candidates)
-            for value in group:
-                if str(value) in CHOICES:
-                    print(value)
-                    #print(used_candidates)
-                    print('removed ' + str(value))
-                    Tile.remove_candidates(value, candidates_active)
-                    if value not in candidates_active:
-                        used_candidates.remove(value)
-                        print(used_candidates)
-                    return True
-                    #print(value.value)
-                    #print(candidates_active)
-            if value.value in candidates_active:
-                candidates_active.remove(value.value)
-                #print(candidates_active)
-            #print(candidates_active)
-            if len(candidates_active) == 1:
-                return Tile.remove_candidates(value, candidates_active)
-        return True
-        """
+            return False # If no changes were made to any tiles, return value is False
+        
     def hidden_single(self) -> bool:
         """
         Suppose we have eliminated all but two candidates from all our unknown tiles. If one of the 
         unknown tiles has a value of 3 and no other unknown tiles have that value of 3, then
         the tile with a candidate of 3 must have the value of 3 because there is no other place
-        to put it (i.e. no other tile has a candidate of 3 because 3 was elimated).
+        to put it (i.e. no other tile has a candidate of 3 because 3 was elimated from their candidates).
 
-        Return True if a value was placed on a tile (marking we made progress)
-        Returns False if no value was placed on a tile (marking we made no progress).
+        Return value True if a value was placed on a tile (marking we *made* progress).
+        Return value False if no value was placed on a tile (marking we *did not make* progress).
         """
-        tile_to_change = None
+        tile_to_change = None # Stores the tile with a sole candidate within the group
         for group in self.groups:
-            set_tile = 0
+            set_tile = 0 # No changes were made to any tile values
             leftovers = set(CHOICES)
-            for tile in group:
+            for tile in group: # Loops through tile values already placed in group and removes them from possibilities
                 if tile.value in CHOICES:
                     if tile.value in leftovers:
                         leftovers.remove(tile.value)
-            for value in leftovers:
+            for value in leftovers: # Loops through values that can be placed and counts how many times that value is in a candidate set
                 count = 0
                 for tile in group:
-                    if value not in tile.value:
-                        if value in tile.candidates:
-                            #print(value)
-                            count += 1
-                            tile_to_change = tile
+                    if value in tile.candidates:
+                        count += 1
+                        tile_to_change = tile
                 if count < 2 and count > 0:
-                    #print(tile_to_change.candidates)
-                    #print(group)
-                    #print(value)
                     tile_to_change.set_value(value)
                     tile_to_change.notify_all(TileEvent(tile_to_change, EventKind.TileChanged))
-                    set_tile += 1
-        if set_tile > 0:
+                    set_tile += 1 # A change was made to a tile value
+        if set_tile > 0: # If a change was made to at least one tile value, return value True
             return True
         else:
             return False
-        """
-        This iteration #### WORKS ####
-        set_tile = False
-        tile_to_change = None
-        for group in self.groups:
-            leftovers = set(CHOICES)
-            for tile in group:
-                if tile.value in CHOICES:
-                    if tile.value in leftovers:
-                        leftovers.remove(tile.value)
-            for value in leftovers:
-                count = 0
-                for tile in group:
-                    if value not in tile.value:
-                        if value in tile.candidates:
-                            #print(value)
-                            if value is '2':
-                                print('{} tile candidates for {}'.format(tile.candidates, value))
-                            count += 1
-                            tile_to_change = tile
-                if count < 2 and count > 0:
-                    print(tile.candidates)
-                    print(group)
-                    print(value)
-                    tile_to_change.set_value(value)
-                    tile_to_change.notify_all(TileEvent(tile, EventKind.TileChanged))
-                    set_tile = True
-                    return True
-        if set_tile:
-            return True
-        else:
-            return False
-        """
-        """
-        set_tile = False
-        for group in self.groups:
-            leftovers = set(CHOICES)
-            for tile in group:
-                if tile.value in CHOICES:
-                    if tile.value in leftovers:
-                        leftovers.remove(tile.value)
-            for value in leftovers:
-                count = 0
-                for tile in group:
-                    for tile in group:
-                        if value not in tile.value:
-                            if value in tile.candidates:
-                                print(value)
-                                print('{} tile candidates for {}'.format(tile.candidates, value))
-                                count += 1
-                    if count < 2 and count > 0:
-                        print(tile.candidates)
-                        print(group)
-                        print(value)
-                        tile.set_value(value)
-                        tile.notify_all(TileEvent(tile, EventKind.TileChanged))
-                        set_tile = True
-                        return True
-        if set_tile:
-            return True
-        else:
-            return False
-        """
         
-        """
-        for group in self.groups:
-            leftovers = set(CHOICES)
-            for tile in group:
-                if tile.value in CHOICES:
-                    if tile.value in leftovers:
-                        leftovers.remove(tile.value)
-            for value in leftovers:
-                count = 0
-                for tile in group:
-                    for candidates in tile.candidates:
-                        #print(candidates)
-                        if value in candidates:
-                            #print(value)
-                            #print(candidates)
-                            count += 1
-                            print(str(count) + ' is count for ' + str(candidates))
-                if count < 2 and count > 0:
-                    print(value)
-                    tile.set_value(value)
-                    tile.notify_all(TileEvent(tile, EventKind.TileChanged))
-                    return True
-        return False
-        """
-    """
-    def solve(self):
-        progress = True
-        while progress:
-            progress = self.naked_single()
-            self.hidden_single()
-        return
-    """
     def min_choice_tile(self) -> Tile: 
         """Returns a tile with value UNKNOWN and 
         minimum number of candidates. 
         Precondition: There is at least one tile 
         with value UNKNOWN. 
         """
-        unknowns_in_board = False #pre-condition of containing unknown '.' values
-        min_candidates_tile = 8 #start at max amount of candidates 0-8
-        min_tile = Tile
+        unknowns_in_board = False # Pre-condition: must contain unknown ('.') values
+        min_candidates_tile = 8 # Start at max amount of candidates -> 0 to 8 possible candidates
+        min_tile = Tile # Stores the tile with the minimum amount of candidates 
         for group in self.groups:
-            for tile in group: #assert pre-condition
+            for tile in group: # Confirms pre-condition is met
                 if tile.value in UNKNOWN:
                     unknowns_in_board = True
-                else:
-                    unknowns_in_board = False
-                    print('##### NO UNKNOWNS ####')
-            for tile in group: #iterate through tiles and change min_tiles if tile has less candidates
-                if unknowns_in_board and tile.value in UNKNOWN:
                     if len(tile.candidates) < min_candidates_tile:
+                        # Iterate through tiles in each group
+                        # and change min_tile if corresponding tile 
+                        # has less candidates than the currently stored tile
                         min_tile = tile
                         min_candidates_tile = len(tile.candidates)
-        if unknowns_in_board:
+        if unknowns_in_board: # Must finish looping through all tiles, return value is Tile with unknown value '.'
             return min_tile
 
     def is_complete(self) -> bool:
@@ -598,7 +290,6 @@ class Board(object):
                     return False
         return True
             
-
     def solve(self):
         """General solver; guess-and-check 
         combined with constraint propagation.
@@ -630,16 +321,4 @@ class Board(object):
             progress = self.naked_single()
             self.hidden_single()
         return
-"""
-board = Board()
-board.set_tiles(["....5..1.", "2........", "5.19..48.",
-                 "6...1.24.", "8.......7", ".23.4...1",
-                 ".69..28.3", "........4", ".4..8...."])
-board.solve()
-solution = ["497856312", "286134795", "531927486",
-            "675319248", "814265937", "923748561",
-            "169472853", "758693124", "342581679"]
-print(board)
-print(solution)
-"""
 
