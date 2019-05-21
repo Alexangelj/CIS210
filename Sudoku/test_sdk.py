@@ -191,6 +191,31 @@ class TestHiddenSingle(unittest.TestCase):
                          "\n".join(["687539124", "243718965", "951264387",
                                     "419873652", "725691438", "836425791",
                                     "394182576", "168957243", "572346819"]))
+    def test_choose_min_tile(self):
+        board = Board()
+        # We want a predictable, single "best" tile to be chosen,
+        # so we'll create a board in which all the 'unknown' tiles
+        # have many candidates but exactly one tile has exactly
+        # two candidates. It will be easiest to see this if we
+        # lay out the board as a matrix.
+        board.set_tiles(["....5....",
+                         "....4....",
+                         ".........",
+                         ".........",
+                         "123....89",
+                         ".........",
+                         ".........",
+                         ".........",
+                         "........."])
+        # Tile (4,4) should have just 6,7 as candidates.
+        # First we have to remove others with naked_single
+        board.naked_single()
+        # Then we can make the choice.
+        tile = board.min_choice_tile()
+        self.assertEqual(tile.value, ".")
+        self.assertEqual(tile.row, 4)
+        self.assertEqual(tile.col, 4)
+        self.assertEqual(tile.candidates, set(["6", "7"]))
 
 if __name__ == "__main__":
     unittest.main()

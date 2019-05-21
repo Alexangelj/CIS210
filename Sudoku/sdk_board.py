@@ -451,7 +451,7 @@ class Board(object):
                             tile_to_change = tile
                 if count < 2 and count > 0:
                     #print(tile_to_change.candidates)
-                    print(group)
+                    #print(group)
                     #print(value)
                     tile_to_change.set_value(value)
                     tile_to_change.notify_all(TileEvent(tile_to_change, EventKind.TileChanged))
@@ -548,7 +548,49 @@ class Board(object):
                     return True
         return False
         """
+    """
     def solve(self):
+        progress = True
+        while progress:
+            progress = self.naked_single()
+            self.hidden_single()
+        return
+    """
+    def min_choice_tile(self) -> Tile: 
+        """Returns a tile with value UNKNOWN and 
+        minimum number of candidates. 
+        Precondition: There is at least one tile 
+        with value UNKNOWN. 
+        """
+        unknowns_in_board = False #pre-condition of containing unknown '.' values
+        min_candidates_tile = 8 #start at max amount of candidates 0-8
+        min_tile = None
+        for group in self.groups:
+            for tile in group: #assert pre-condition
+                if tile.value in UNKNOWN:
+                    unknowns_in_board = True
+                else:
+                    unknowns_in_board = False
+            for tile in group: #iterate through tiles and change min_tiles if tile has less candidates
+                if unknowns_in_board and tile.value in UNKNOWN:
+                    if len(tile.candidates) < min_candidates_tile:
+                        min_tile = tile
+                        min_candidates_tile = len(tile.candidates)
+        return min_tile
+
+
+
+    def solve(self):
+        """General solver; guess-and-check 
+        combined with constraint propagation.
+        """
+        self.propagate()
+        
+    def propagate(self):
+        """Repeat solution tactics until we
+        don't make any progress, whether or not
+        the board is solved.
+        """
         progress = True
         while progress:
             progress = self.naked_single()
@@ -556,8 +598,16 @@ class Board(object):
         return
 
 board = Board()
-board.set_tiles(["......12.", "24..1....", "9.1..4...",
-                         "4....365.", "....9....", ".364....1",
-                         "...1..5.6", "....5..43", ".72......"])
-board.solve()
+board.set_tiles(["....5....",
+                         "....4....",
+                         ".........",
+                         ".........",
+                         "123....89",
+                         ".........",
+                         ".........",
+                         ".........",
+                         "........."])
+board.naked_single()
+tile = board.min_choice_tile()
 print(board)
+print(tile)
