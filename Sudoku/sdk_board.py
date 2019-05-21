@@ -174,11 +174,18 @@ class Board(object):
 
     def __str__(self) -> str:
         """In Sadman Sudoku format"""
+        return "\n".join(self.as_list())
+
+
+    def as_list(self) -> List[str]:
+        """Tile values in a format compatible with 
+        set_tiles.
+        """
         row_syms = [ ]
         for row in self.tiles:
             values = [tile.value for tile in row]
             row_syms.append("".join(values))
-        return "\n".join(row_syms)
+        return row_syms
     
     def is_consistent(self) -> bool:
         for group in self.groups:
@@ -564,27 +571,54 @@ class Board(object):
         """
         unknowns_in_board = False #pre-condition of containing unknown '.' values
         min_candidates_tile = 8 #start at max amount of candidates 0-8
-        min_tile = None
+        min_tile = Tile
         for group in self.groups:
             for tile in group: #assert pre-condition
                 if tile.value in UNKNOWN:
                     unknowns_in_board = True
                 else:
                     unknowns_in_board = False
+                    print('##### NO UNKNOWNS ####')
             for tile in group: #iterate through tiles and change min_tiles if tile has less candidates
                 if unknowns_in_board and tile.value in UNKNOWN:
                     if len(tile.candidates) < min_candidates_tile:
                         min_tile = tile
                         min_candidates_tile = len(tile.candidates)
-        return min_tile
+        if unknowns_in_board:
+            return min_tile
 
-
+    def is_complete(self) -> bool:
+        """None of the tiles are UNKNOWN.  
+        Note: Does not check consistency; do that 
+        separately with is_consistent.
+        """
+        for group in self.groups:
+            for tile in group:
+                if tile.value in UNKNOWN:
+                    return False
+        return True
+            
 
     def solve(self):
         """General solver; guess-and-check 
         combined with constraint propagation.
         """
         self.propagate()
+        if self.is_complete():
+            return True
+        elif not self.is_consistent():
+            return False
+        else:
+            saved_board = self.as_list()
+            guess_tile = self.min_choice_tile()
+            candidates = guess_tile.candidates
+            for value in candidates:
+                guess_tile.set_value(value)
+                if self.solve():
+                    return True
+                else:
+                    self.set_tiles(saved_board)
+            return False
         
     def propagate(self):
         """Repeat solution tactics until we
@@ -596,18 +630,16 @@ class Board(object):
             progress = self.naked_single()
             self.hidden_single()
         return
-
+"""
 board = Board()
-board.set_tiles(["....5....",
-                         "....4....",
-                         ".........",
-                         ".........",
-                         "123....89",
-                         ".........",
-                         ".........",
-                         ".........",
-                         "........."])
-board.naked_single()
-tile = board.min_choice_tile()
+board.set_tiles(["....5..1.", "2........", "5.19..48.",
+                 "6...1.24.", "8.......7", ".23.4...1",
+                 ".69..28.3", "........4", ".4..8...."])
+board.solve()
+solution = ["497856312", "286134795", "531927486",
+            "675319248", "814265937", "923748561",
+            "169472853", "758693124", "342581679"]
 print(board)
-print(tile)
+print(solution)
+"""
+

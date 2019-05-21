@@ -217,5 +217,29 @@ class TestHiddenSingle(unittest.TestCase):
         self.assertEqual(tile.col, 4)
         self.assertEqual(tile.candidates, set(["6", "7"]))
 
+    def test_save_restore(self):
+        """as_list and set_tiles should work as saving and
+        restoring board state.
+        """
+        board = Board()
+        tiles_list = ["......12.", "24..1....", "9.1..4...",
+                        "4....365.", "....9....", ".364....1",
+                        "...1..5.6", "....5..43", ".72......"]
+        board.set_tiles(tiles_list)
+        saved = board.as_list()
+        self.assertEqual(tiles_list, saved)
+    
+    def test_guess_check(self):
+        """From data/evil.sdk"""
+        board = Board()
+        board.set_tiles(["....5..1.", "2........", "5.19..48.",
+                         "6...1.24.", "8.......7", ".23.4...1",
+                         ".69..28.3", "........4", ".4..8...."])
+        board.solve()
+        solution = ["497856312", "286134795", "531927486",
+                    "675319248", "814265937", "923748561",
+                    "169472853", "758693124", "342581679"]
+        self.assertEqual(board.as_list(), solution)
+
 if __name__ == "__main__":
     unittest.main()
