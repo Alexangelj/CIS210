@@ -1,0 +1,6 @@
+Bitwise operators:
+>> shift right
+<< shift left
+& and
+|| or
+p^q exclusive

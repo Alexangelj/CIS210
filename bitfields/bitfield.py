@@ -30,10 +30,11 @@ class BitField(object):
     """
     def __init__(self, low: int, high:int):
         """
-        Takes two integers to indicate low and high bounds of bitfield.
+        Takes two integers to indicate
+        low and high bounds of bitfield.
         """
-        self.low = from_bit
-        self.high = to_bit
+        self.low = low
+        self.high = high
 
     def insert(self, field: int, word: int):
         """
@@ -45,10 +46,28 @@ class BitField(object):
         low_4 = BitField(0, 3)
         self.assertEqual(low_4.insert(13, 0), 13)
         """
-        field_width = word - field + 1
-        field_max = None
-        
-        pass
+        # 13 in binary is 001101
+        # 21 in binary is 010101
+        # 5 in binary is  000101
+        # if word is   xaa00aa00 and
+    #      field_val is x0000000f
+    #      and the field is bits 4..7
+    #      then insert gives xaa00aaf0
+        # if word is 0000
+        # and field_val is 1101
+        # then insert gives 1101
+        # if word is 000000
+        # and field_val is 010101
+        # and the field is bits 0..3
+        # then insert gives 0101
+        field_width = self.high - self.low
+        field_max = self.high
+        new_word = field
+        if field < field_max:
+            new_word = field << word
+        if field > field_max:
+            new_word = new_word^field_width
+        return new_word
     
     def extract(self, word: int) -> int:
         """
