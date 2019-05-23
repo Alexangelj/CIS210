@@ -35,6 +35,8 @@ class BitField(object):
         """
         self.low = low
         self.high = high
+        self.width = 2**(self.high + 1)
+        self.mask = high & low
 
     def insert(self, field: int, word: int):
         """
@@ -60,13 +62,13 @@ class BitField(object):
         # and field_val is 010101
         # and the field is bits 0..3
         # then insert gives 0101
-        field_width = self.high - self.low
-        field_max = self.high
         new_word = field
-        if field < field_max:
-            new_word = field << word
-        if field > field_max:
-            new_word = new_word^field_width
+        if new_word < self.width:
+            new_word = field << self.low
+        if word > self.width:
+            new_word = new_word | word^self.width
+        if new_word > self.width:
+            new_word = (new_word^self.width)
         return new_word
     
     def extract(self, word: int) -> int:
@@ -74,10 +76,42 @@ class BitField(object):
         Args: word(int).
         Returns: value of the field.
         """
-        pass
+        new_word = word
+        if new_word > self.width:
+            new_word = new_word & (self.width - 1)
+            return new_word
+        if new_word < self.width:
+            new_word = new_word >> self.low
+        return new_word
 
+    def sign_extend(self, field: int, width: int) -> int:
+        """Interpret field as a signed integer with width bits.
+        If the sign bit is zero, it is positive.  If the sign bit
+        is negative, the result is sign-extended to be a negative
+        integer in Python.
+        width must be 2 or greater. field must fit in width bits.
+        """
+        log.debug("Sign extending {} ({}) in field of {} bits".format(field, bin(field), width))
+        assert width > 1
+        assert field >= 0 and field < 1 << (width + 1)
+        sign_bit = 1 << (width - 1) # will have form 1000... for width of field
+        mask = sign_bit - 1         # will have form 0111... for width of field
+        if (field & sign_bit):
+            # It's negative; sign extend it
+            log.debug("Complementing by subtracting 2^{}={}".format(width-1,sign_bit))
+            extended = (field & mask) - sign_bit
+            log.debug("Should return {} ({})".format(extended, bin(extended)))
+            return extended
+        else:
+            return field
+    
     def extract_signed(self, word: int) -> int:
-        pass
+        new_word = self.sign_extend(word, self.high)
+        if new_word > self.width:
+            return new_word
+        if new_word < self.width:
+            new_word = new_word >> self.low
+        return new_word
     # FIXME:
     #    The constructor should take two integers, from_bit and to_bit,
     #    indicating the bounds of the field.  Unlike a Python range, these
@@ -135,24 +169,3 @@ class BitField(object):
 #    Sign extension distinguishes these cases by checking
 #    the "sign bit", the highest bit in the field.
 #
-def sign_extend(field: int, width: int) -> int:
-    """Interpret field as a signed integer with width bits.
-    If the sign bit is zero, it is positive.  If the sign bit
-    is negative, the result is sign-extended to be a negative
-    integer in Python.
-    width must be 2 or greater. field must fit in width bits.
-    """
-    log.debug("Sign extending {} ({}) in field of {} bits".format(field, bin(field), width))
-    assert width > 1
-    assert field >= 0 and field < 1 << (width + 1)
-    sign_bit = 1 << (width - 1) # will have form 1000... for width of field
-    mask = sign_bit - 1         # will have form 0111... for width of field
-    if (field & sign_bit):
-        # It's negative; sign extend it
-        log.debug("Complementing by subtracting 2^{}={}".format(width-1,sign_bit))
-        extended = (field & mask) - sign_bit
-        log.debug("Should return {} ({})".format(extended, bin(extended)))
-        return extended
-    else:
-        return field
-
