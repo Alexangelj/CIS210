@@ -36,7 +36,7 @@ class BitField(object):
         self.low = low
         self.high = high
         self.width = 2**(self.high + 1)
-        self.mask = high & low
+        self.mask = self.width - (2**self.low)
 
     def insert(self, field: int, word: int):
         """
@@ -66,10 +66,11 @@ class BitField(object):
         if new_word < self.width:
             new_word = field << self.low
         if word > self.width:
-            new_word = new_word | word^self.width
+            new_word = new_word | word
+            return new_word
         if new_word > self.width:
             new_word = (new_word^self.width)
-        return new_word
+        return new_word & self.mask
     
     def extract(self, word: int) -> int:
         """
