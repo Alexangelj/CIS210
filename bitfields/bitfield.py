@@ -37,6 +37,7 @@ class BitField(object):
         self.high = high
         self.width = 2**(self.high + 1)
         self.mask = self.width - (2**self.low)
+        #self.mask = 1 << self.low
 
     def insert(self, field: int, word: int):
         """
@@ -47,6 +48,7 @@ class BitField(object):
         Example:
         low_4 = BitField(0, 3)
         self.assertEqual(low_4.insert(13, 0), 13)
+        insert word into field
         """
         # 13 in binary is 001101
         # 21 in binary is 010101
@@ -62,28 +64,47 @@ class BitField(object):
         # and field_val is 010101
         # and the field is bits 0..3
         # then insert gives 0101
+        if field > self.width:
+            return field & self.mask
+        if word > self.width:
+            return word^self.mask
+        new_word = word | field
+        return new_word & self.mask
+        """
         new_word = field
         if new_word < self.width:
             new_word = field << self.low
+            new_word = new_word & self.mask
         if word > self.width:
             new_word = new_word | word
             return new_word
+        if word < self.width:
+            return new_word & self.mask
         if new_word > self.width:
             new_word = (new_word^self.width)
-        return new_word & self.mask
-    
+            new_word = new_word & self.mask
+        return new_word
+        """
     def extract(self, word: int) -> int:
         """
         Args: word(int).
         Returns: value of the field.
         """
         new_word = word
+        print(str(word) + ' is word')
         if new_word > self.width:
-            new_word = new_word & (self.width - 1)
+            #print(self.width)
+            new_word = new_word
+            print(str(new_word) + ' is new word,' + str(self.width) + ' is width')
+            print(hex(new_word))
+            print(hex(new_word & self.mask))
+            new_word = new_word & self.mask
+            # & (self.width - 1)
             return new_word
         if new_word < self.width:
             new_word = new_word >> self.low
-        return new_word
+            return new_word
+        return new_word & self.mask
 
     def sign_extend(self, field: int, width: int) -> int:
         """Interpret field as a signed integer with width bits.
@@ -170,3 +191,15 @@ class BitField(object):
 #    Sign extension distinguishes these cases by checking
 #    the "sign bit", the highest bit in the field.
 #
+
+lowpart = BitField(0, 3)
+midpart = BitField(4, 6)
+highpart = BitField(7, 9)
+packed = 0
+packed = lowpart.insert(1, packed)
+packed = midpart.insert(1, packed)
+packed = highpart.insert(1, packed)
+
+print(str(lowpart.extract(packed)) + ' is extract low part')
+print(str(midpart.extract(packed)) + ' is extract mid part')
+print(str(highpart.extract(packed)) + ' is extract high part')

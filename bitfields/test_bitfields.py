@@ -70,28 +70,6 @@ class TestBitFields(unittest.TestCase):
         # Note 0xf0 == 240
 
 
-class TestSignExtension(unittest.TestCase):
-    """Testing the sign extension function.  If you move sign extension into
-    the BitFields class, you may want to remove this test class.
-    """
-
-    def test_extend_neg(self):
-        """0b111 in a 3-bit field is negative 1"""
-        self.assertEqual(bitfield.sign_extend(7, 3), -1)
-
-    def test_extend_neg(self):
-        """0b0111 in a 4-bit field is positive 7"""
-        self.assertEqual(bitfield.sign_extend(7, 4), 7)
-
-    def test_not_all_neg(self):
-        """For good measure, make sure it works for an integer that
-        is not all 1s.
-        """
-        self.assertEqual(bitfield.sign_extend(11, 4), -5)
-        self.assertEqual(bitfield.sign_extend(11, 5), 11)
-        self.assertEqual(bitfield.sign_extend(13, 4), -3)
-        self.assertEqual(bitfield.sign_extend(13, 5), 13)
-
 
 if __name__ == '__main__':
     unittest.main()
